@@ -13,7 +13,7 @@ unsigned int GREEN = 12;
 unsigned int RED = 8;
 unsigned int SERVO = 9;
 
-unsigned int LIMIT = 13; // hour
+unsigned int LIMIT = 0x10; // hour
 
 Servo servo;
 
@@ -43,7 +43,7 @@ void loop() {
   Serial.println(Rtc.seconds(),HEX);
 
   if (Rtc.hours() < LIMIT) {
-    if (Rtc.hours() == (LIMIT - 1) && Rtc.minutes() == 59) {
+    if (Rtc.hours() == (LIMIT - 1) && Rtc.minutes() == 0x59) {
       digitalWrite(GREEN, (Rtc.seconds() % 2) ? HIGH : LOW);
     } else {
       digitalWrite(GREEN, HIGH);
@@ -58,9 +58,13 @@ void loop() {
     digitalWrite(RED, (Rtc.seconds() % 2) ? HIGH : LOW);
 
     if (Rtc.minutes() == 0) {
-      servo.write(180 - Rtc.seconds() * 2);
+      servo.write(180 - Bcd2Dec(Rtc.seconds()) * 2);
     }
   }
   delay(200);
 }
 
+// see http://baticadila.dip.jp/arduino_104.html
+byte Bcd2Dec(byte b) {
+  return ((b >> 4) * 10 + b & 0xf);
+}
